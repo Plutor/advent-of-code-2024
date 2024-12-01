@@ -23,7 +23,6 @@ function part1(d: string[]) {
 
 function part2(d: string[]) {
   let lefts = [], rightsMap = [];
-  // It'd be faster to sort while we build, but not necessary with this size of input.
   d.forEach((s) => {
     vals = toIntsArray(s)
     lefts.push(vals[0]);
