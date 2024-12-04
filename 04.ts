@@ -58,7 +58,20 @@ function rotateCCW(d: string[]) {
 }
 
 function part2(d: string[]) {
-  return d.length;
+  const getChar = function(x,y: Int) {
+    if (y < 0 || y >= d.length ||
+        x < 0 || x >= d[y].length) return ' ';
+    return d[y][x];
+  }
+  let count = 0;
+  for (let y = 0; y < d.length; y++) {
+    for (let x = 0; x < d[y].length; x++) {
+      if (getChar(x,y) != 'A') continue;
+      let corners = getChar(x-1,y-1) + getChar(x+1,y-1) + getChar(x+1,y+1) + getChar(x-1,y+1);
+      if (corners == 'MSSM' || corners == 'SMMS' || corners == 'SSMM' || corners == 'MMSS') count++;
+    }
+  }
+  return count;
 }
 
 let sampleData = toLinesArray(
@@ -75,5 +88,5 @@ MXMXAXMASX`);
 
 console.log("part1(sampleData) = " + part1(sampleData));
 console.log("part1 = " + part1(loadData()));
-// console.log("part2(sampleData) = " + part2(sampleData));
-// console.log("part2 = " + part2(loadData()));
+console.log("part2(sampleData) = " + part2(sampleData));
+console.log("part2 = " + part2(loadData()));
