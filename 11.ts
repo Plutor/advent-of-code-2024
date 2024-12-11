@@ -4,38 +4,46 @@ function loadData() {
   return fileContents('data/11')
 }
 
-function part1(d: string, blinks: int) {
-  let data = d.split(" ").map((v) => parseInt(v));
+function doBlinks(d: string, blinks: int) {
+  let data = {};
+  d.split(" ").forEach((v) => {
+    if (v in data) data[v]++;
+    else data[v] = 1;
+  });
   for (let i = 0; i < blinks; i++) {
-    console.log("Blink " + i + " = " + data.length);
     data = blink(data);
+    let count = 0;
+    for (let c in data) count += parseInt(data[c]);
   }
-  // console.log(data);
-  return data.length;
+  let count = 0;
+  for (let c in data) count += parseInt(data[c]);
+  return count;
 }
 
-function blink(d: int[]) {
-  let after = []
-  d.forEach((v) => {
+function blink(d: Object) {
+  let after = {}
+  let addToAfter = function(v: int, count: int) {
+    if (v in after) after[v] += count;
+    else after[v] = count;
+  }
+  for (let s in d) {
+    const count = d[s];
+    const v = parseInt(s);
+    let afterV;
     if (v == 0) {
-      after.push(1);
+      addToAfter(1, count);
     } else if (("" + v).length % 2 == 0) {
-      const s = ("" + v)
-      after.push(parseInt(s.slice(0, Math.floor(s.length/2))))
-      after.push(parseInt(s.slice(Math.floor(s.length/2))))
+      addToAfter(parseInt(s.slice(0, Math.floor(s.length/2))), count);
+      addToAfter(parseInt(s.slice(Math.floor(s.length/2))), count)
     } else {
-      after.push(v * 2024)
+      addToAfter(v * 2024, count)
     }
-  })
+  }
   return after
-}
-
-function part2(d: string[]) {
-  return d.length;
 }
 
 let sampleData = `0 1 10 99 999`;
 
-console.log("part1(sampleData) = " + part1(sampleData, 1));
-console.log("part1 = " + part1(loadData(), 25));
-// console.log("part2 = " + part1(loadData(), 75));
+console.log("doBlinks(sampleData) = " + doBlinks(sampleData, 1));
+console.log("doBlinks = " + doBlinks(loadData(), 25));
+console.log("part2 = " + doBlinks(loadData(), 75));
