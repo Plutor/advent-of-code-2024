@@ -22,24 +22,29 @@ function part1(d: string[]) {
 }
 
 function findBest(ax: int, ay: int, bx: int, by: int, x: int, y: int) {
-  let best = 9999999;
-  for (let a = 0; a <= 100; a++) {
-    if ((x - (ax * a)) % bx != 0 || (y - (ay * a)) % by != 0) continue;
-    const b = (x - (ax * a)) / bx;
-    // console.log("a=" + a + ", b=" + b);
-    // console.log("ax=" + ax + ", bx=" + bx);
-    // console.log("ay=" + ay + ", by=" + by);
-    // console.log("" + ((ay * a) + (by * b)) + " <=> " + y);
-    if ((ay * a) + (by * b) != y) continue;
-    const tokens = a * 3 + b;
-    if (tokens < best) best = tokens;
-    // console.log(tokens);
-  }
-  return best == 9999999 ? 0 : best;
+  const determinant = (ax * by) - (ay * bx);
+  const a = Math.round((x * by / determinant) + (y * -bx / determinant));
+  const b = Math.round((x * -ay / determinant) + (y * ax / determinant));
+  if (a*ax + b*bx != x || a*ay + b*by != y) return 0;
+  if (a < 0 || b < 0) return 0;
+  return 3 * a + b;
 }
 
 function part2(d: string[]) {
-  return d.length;
+  let sum = 0;
+  let ax, ay, bx, by;
+  d.forEach((l) => {
+    if ((m = l.match(/Button A: X\+(\d+), Y\+(\d+)/)) != null) {
+      ax = parseInt(m[1]);
+      ay = parseInt(m[2]);
+    } else if ((m = l.match(/Button B: X\+(\d+), Y\+(\d+)/)) != null) {
+      bx = parseInt(m[1]);
+      by = parseInt(m[2]);
+    } else if ((m = l.match(/Prize: X=(\d+), Y=(\d+)/)) != null) {
+      sum += findBest(ax, ay, bx, by, 10000000000000 + parseInt(m[1]), 10000000000000 + parseInt(m[2]));
+    }
+  });
+  return sum;
 }
 
 let sampleData = toLinesArray(
@@ -61,5 +66,5 @@ Prize: X=18641, Y=10279`);
 
 console.log("part1(sampleData) = " + part1(sampleData));
 console.log("part1 = " + part1(loadData()));
-// console.log("part2(sampleData) = " + part2(sampleData));
-// console.log("part2 = " + part2(loadData()));
+console.log("part2(sampleData) = " + part2(sampleData));
+console.log("part2 = " + part2(loadData()));
