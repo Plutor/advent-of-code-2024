@@ -63,7 +63,7 @@ function score(grid: string[]) {
   let sum = 0;
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
-      if (grid[y][x] != "O") continue;
+      if (grid[y][x] != "O" && grid[y][x] != "[") continue;
       sum += (100 * y) + x;
     }
   }
@@ -71,43 +71,82 @@ function score(grid: string[]) {
 }
 
 function part2(d: string[]) {
-  return d.length;
+  let [grid, instructions, robot] = parseInput(d);
+
+  // Expand the input
+  for (let y = 0; y < grid.length; y++) {
+    grid[y] = grid[y].replaceAll("#", "##").replaceAll(".", "..").replaceAll("O", "[]");
+  }
+  robot.x = robot.x * 2;
+
+  instructions.split("").forEach((inst) => {
+    const dir = instToDirection[inst];
+    console.log("====");
+    if (move2(grid, robot, dir)) {
+      robot = {x: robot.x + dir.x, y: robot.y + dir.y};
+    }
+    console.log(grid);
+    console.log(robot);
+  });
+
+  return score(grid);
 }
 
-for (let sampleData of [toLinesArray(
-`########
-#..O.O.#
-##@.O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
+// Returns true if the move was successful, modifies grid in-place. Recurses to potentially move multiple boxes.
+function move2(grid: string[], src: Object, dir: Object, dryRun: bool) {
+  // TODO: This
+}
 
-<^^>>>vv<v>>v<<`),
-toLinesArray(`##########
-#..O..O.O#
-#......O.#
-#.OO..O.O#
-#..O@..O.#
-#O#..O...#
-#O..O..O.#
-#.OO.O.OO#
-#....O...#
-##########
+const s = [
+  toLinesArray(`#######
+#...#.#
+#.....#
+#..OO@#
+#..O..#
+#.....#
+#######
 
-<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
-vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
-><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
-<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
-^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
-^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
->^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
-<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
-^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
-v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^`)]) {
+<vv<<^^`)
+// <vv<<^^<<^^`)
+//   toLinesArray(
+// `########
+// #..O.O.#
+// ##@.O..#
+// #...O..#
+// #.#.O..#
+// #...O..#
+// #......#
+// ########
+
+// <^^>>>vv<v>>v<<`)
+// toLinesArray(`##########
+// #..O..O.O#
+// #......O.#
+// #.OO..O.O#
+// #..O@..O.#
+// #O#..O...#
+// #O..O..O.#
+// #.OO.O.OO#
+// #....O...#
+// ##########
+
+// <vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+// vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+// ><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+// <<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+// ^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+// ^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+// >^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+// <><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+// ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+// v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^`)
+];
+
+for (let sampleData of s) {
   console.log("part1(sampleData) = " + part1(sampleData));
 }
 // console.log("part1 = " + part1(loadData()));
-// console.log("part2(sampleData) = " + part2(sampleData));
+for (let sampleData of s) {
+  console.log("part2(sampleData) = " + part2(sampleData));
+}
 // console.log("part2 = " + part2(loadData()));
