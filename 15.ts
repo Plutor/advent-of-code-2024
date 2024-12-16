@@ -4,11 +4,31 @@ function loadData() {
   return toLinesArray(fileContents('data/15'))
 }
 
+const instToDirection = {
+  "v": {x:0,y:1},
+  "^": {x:0,y:-1},
+  ">": {x:1,y:0},
+  "<": {x:-1,y:0},
+}
+
 function part1(d: string[]) {
+  let [grid, instructions, robot] = parseInput(d);
+
+  instructions.split("").forEach((inst) => {
+    const dir = instToDirection[inst];
+    if (move(grid, robot, dir)) {
+      robot = {x: robot.x + dir.x, y: robot.y + dir.y};
+    }
+  });
+
+  return score(grid);
+}
+
+// Parse out the grid, instructions, and robot location.
+function parseInput(d: string[]) {
   let robot = {x:0, y:0};
   let grid = [];
   let instructions = "";
-  // Parse out the grid, instructions, and robot location.
   d.forEach((l) => {
     if (l.indexOf("#") == -1) {
       instructions = instructions + l;
@@ -20,32 +40,26 @@ function part1(d: string[]) {
       grid.push(l.replace("@", "."));
     }
   });
+  return [grid, instructions, robot];
+}
 
-  const instToDirection = {
-    "v": {x:0,y:1},
-    "^": {x:0,y:-1},
-    ">": {x:1,y:0},
-    "<": {x:-1,y:0},
-  }
-  instructions.split("").forEach((inst) => {
-    const dir = instToDirection[inst];
-    const newRobot = {x: robot.x + dir.x, y: robot.y + dir.y};
-    let nextNonBox;
-    for (nextNonBox = newRobot;
-         nextNonBox.y > 0 && nextNonBox.y < grid.length &&
-           nextNonBox.x > 0 && nextNonBox.x < grid[nextNonBox.y].length &&
-           grid[nextNonBox.y][nextNonBox.x] == "O";
-         nextNonBox = {x: nextNonBox.x + dir.x, y: nextNonBox.y + dir.y}) {}
-    if (grid[nextNonBox.y][nextNonBox.x] == "#") return;  // Do nothing if it's a wall.
+// Returns true if the move was successful, modifies grid in-place. Recurses to potentially move multiple boxes.
+function move(grid: string[], src: Object, dir: Object) {
+  const dst = {x: src.x + dir.x, y: src.y + dir.y};
+  // Out of bounds
+  if (dst.y < 0 || dst.y >= grid.length || dst.x < 0 || dst.x >= grid[dst.y].length) return false;
+  // Walls
+  if (grid[dst.y][dst.x] == "#") return false;
+  // If it's a box, try to push it too
+  if (grid[dst.y][dst.x] == "O" && !move(grid, dst, dir)) return false;
+  // Move what's in src into dst
+  grid[dst.y] = grid[dst.y].slice(0, dst.x) + grid[src.y][src.x] + grid[dst.y].slice(dst.x + 1);
+  // Mark src empty
+  grid[src.y] = grid[src.y].slice(0, src.x) + "." + grid[src.y].slice(src.x + 1);
+  return true;
+}
 
-    // Move the robot in the direction.
-    robot = newRobot;
-    // Move what's in the new robot space to the nextNonBox space (empty if we're here).
-    grid[nextNonBox.y] = grid[nextNonBox.y].slice(0, nextNonBox.x) + grid[robot.y][robot.x] + grid[nextNonBox.y].slice(nextNonBox.x + 1);
-    // Mark the new robot space empty.
-    grid[robot.y] = grid[robot.y].slice(0, robot.x) + "." + grid[robot.y].slice(robot.x + 1);
-  });
-
+function score(grid: string[]) {
   let sum = 0;
   for (let y = 0; y < grid.length; y++) {
     for (let x = 0; x < grid[y].length; x++) {
@@ -94,6 +108,6 @@ vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
 v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^`)]) {
   console.log("part1(sampleData) = " + part1(sampleData));
 }
-console.log("part1 = " + part1(loadData()));
+// console.log("part1 = " + part1(loadData()));
 // console.log("part2(sampleData) = " + part2(sampleData));
 // console.log("part2 = " + part2(loadData()));
